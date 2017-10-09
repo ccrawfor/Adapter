@@ -16,8 +16,12 @@ class bbuAdapter(Adapter):
                 if readings:
                     for key, value in readings.iteritems():
                         logging.debug("Key: %s & value: %s", key, value)
-                        self.publishSB(self.telemetry(key, value))
-                time.sleep(0.02)
+                        #self.publishSB(self.telemetry(key, value))
+                        if not self.isAlert(key):
+                            self.publishSB(self.telemetryCloud(key, value))
+                        else:
+                            self.sendAlert(key, value)
+                time.sleep(0.5)
             except ServiceExit:
                 self.cleanUp()
                 break

@@ -9,6 +9,7 @@ from cpppo.server.enip import address, client
 from exception import ServiceExit
 from adapterconfig import AdapterConfig
 from types import DictType, StringType
+from alerthandler import alerthandler
 
 class Adapter(AdapterConfig):
         """ Adapter handles the reading and publishing of data. 
@@ -37,19 +38,10 @@ class Adapter(AdapterConfig):
         """    
         def __init__(self, name):
             super(Adapter, self).__init__(name)
-            """
-            self.clientAlert = paho.Client()
-            self.clientAlert.username_pw_set(self.mqUser, self.mqPwd)
-            self.clientAlert.on_connect = self.__on_alert_connect
-            self.clientAlert.on_publish = self.__on_alert_publish
-            self.clientAlert.tls_set('/etc/ssl/certs/ca-certificates.crt', certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED,
-    tls_version=ssl.PROTOCOL_TLSv1, ciphers=None)
-            self.clientAlert.tls_insecure_set(True)
-            self.clientAlert.connect(self.mqServer, self.mqPort, self.mqKeepAlive)
-            self.clientAlert.loop_start()            
-            """
+
             self.client = paho.Client()
-        
+            self.alertHandler = alerthandler()
+
             if not (self.mqDevice) is None:
                 logging.debug("Using Device Credentials")
                 self.client.username_pw_set(self.mqDevice, self.mqPword)
@@ -86,7 +78,6 @@ class Adapter(AdapterConfig):
                 
             :return: None
             """
-            
             logging.info("Connected to the MQTT broker: %s with Client: %s", self.mqttRC.get(rc, "None"), client)
 
         def __on_alert_connect(self, client, userdata, flags, rc):
@@ -143,7 +134,49 @@ class Adapter(AdapterConfig):
                     return str([json.dumps(alert.__dict__)]).replace("'","")
             except KeyError:
                 logging.info("Tag does not exist: %s" % id)
-                raise ServiceExit
+                #what type of exception should we raise?
+                #raise ServiceExit
+
+
+        def isAlert(self, id):
+        #add additional abstraction creating measurement / alerts
+            if type(self.tags.get(id)) is DictType:
+                return True
+            else:
+                return False
+
+        def sendAlert(self, id, value):
+            
+            try:
+
+                def alert():
+                    pass
+
+                if int(value) == 0:
+                    i = self.alertHandler.clearAlerts(id)
+                    for alerts in i:
+                        logging.debug("Clearing Alerts For Key %s:", id)
+                        alert.name = (self.tags[id][str(alerts)])[0]
+                        alert.message = (self.tags[id][str(alerts)])[1]
+                        alert.state = "clear"
+                        msg = str([json.dumps(alert.__dict__)]).replace("'","") 
+                        self.publishSB(msg)
+                        self.alertHandler.resetAlerts(id)
+                        self.alertHandler.dumpAlerts()
+                else:
+                    if not self.alertHandler.alertExists(id, value):
+                        name = (self.tags[id][str(value)])[0]
+                        logging.debug("Setting Alerts For Key %s: and Value %s", id, value)
+                        self.alertHandler.recordAlert(id, value)
+                        alert.name = (self.tags[id][str(value)])[0]
+                        alert.message = (self.tags[id][str(value)])[1]
+                        alert.state = "set"
+                        msg = str([json.dumps(alert.__dict__)]).replace("'","")
+                        self.publishSB(msg)
+
+            except KeyError:
+                logging.info("Tag does not exist: %s" , id)
+
 
 
         def legacyMsg(self):
@@ -156,21 +189,17 @@ class Adapter(AdapterConfig):
             leg.value = "True"
             return json.dumps(leg.__dict__)
            
-
-    
-
         def publishSB(self, msg):
             """ Publishes the readings to an mqtt broker:
 
             :param :msg: Formatted message appropriate for the subscriber
             """
+          
             logging.debug(msg)
-            #logger.debug(msg)
             if not all(chr in msg for chr in 'state'):
                 self.client.publish(self.topic,
                     payload=msg, qos=0, retain=False)
-            else: 
-                logging.info("+++++++++Alert+++++++++++")             
+            else:             
                 self.client.publish(self.alertTopic,
                    payload=msg, qos=0, retain=False)
 
