@@ -21,7 +21,7 @@ class bbuAdapter(Adapter):
                             self.publishSB(self.telemetryCloud(key, value))
                         else:
                             self.sendAlert(key, value)
-                time.sleep(0.5)
+                time.sleep(30.0)
             except ServiceExit:
                 self.cleanUp()
                 break
