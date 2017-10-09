@@ -15,12 +15,14 @@ class AdapterConfig(object):
             :param name: The name of the device as defined in the configuration file.
             """
             logging.getLogger().setLevel(logging.DEBUG)
-            #logging.getLogger("enip").setLevel(logging.WARNING)
-            #logging.getLogger("cpppo").setLevel(logging.WARNING)
+            logging.getLogger("enip").setLevel(logging.WARNING)
+            logging.getLogger("cpppo").setLevel(logging.WARNING)
             signal.signal(signal.SIGTERM, self.service_shutdown)
             signal.signal(signal.SIGINT, self.service_shutdown)
-            rfh = RotatingFileHandler(settings['relayr']['logpath'] + name + '.log', mode='a', maxBytes=10*1024, backupCount=5, encoding=None, delay=0)
+            rfh = RotatingFileHandler(settings['relayr']['logpath'] + name + '.log', mode='a', maxBytes=10485760, backupCount=5, encoding=None, delay=0)
             rfh.setLevel(settings['relayr']['loglevel'])
+            frm = logging.Formatter('[%(asctime)s - %(filename)s:%(lineno)s - %(funcName)s ] %(message)s')
+            rfh.setFormatter(frm) 
             logging.getLogger().addHandler(rfh)
             
             self.mqttRC = {0:"Connection Successful", 1:"Connection refused - Incorrect protocol version",
