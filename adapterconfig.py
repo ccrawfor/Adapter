@@ -34,6 +34,7 @@ class AdapterConfig(object):
             self.init = None
             self.type = None
             dev = settings['devices']
+            vendors = settings['vendors']
             if 'plc' in dev and dev['plc']:
                 if 'enip' in dev['plc']:
                     if (dev['plc']['enip']):
@@ -64,7 +65,7 @@ class AdapterConfig(object):
                                 self.init = dev['plc']['modbus'][name]
             #expand to include known sensors
             if not (self.init):
-                assert False, 'Device not found'
+                logging.debug('Device not found Checking Vendors')
             if  settings['relayr']['mqtt_credentials']:
                 self.mqUser = settings['relayr']['mqtt_credentials']['user']         
                 self.mqPwd = settings['relayr']['mqtt_credentials']['password']
@@ -73,6 +74,25 @@ class AdapterConfig(object):
             self.mqHost = self.mqServer.get('server')
             self.mqPort = self.mqServer.get('port')
             self.mqKeepAlive = self.mqServer.get('keepalive')
+            #if using ifm smart observer
+            if 'ifm' in vendors and vendors['ifm']['smartobserver']:
+                if (name in vendors['ifm']['smartobserver']):
+                    self.init = vendors['ifm']['smartobserver']['sqlexpress']
+                    self.svr = self.init.get('server')
+                    self.usr = self.init.get('user')
+                    self.pwd = self.init.get('password')
+                    self.prt = self.init.get('port')
+                    self.hst = self.init.get('host')
+                    self.db = self.init.get('database')
+                    self.sql = self.init.get('sql')
+                    self.mqPword = self.init.get('mqPword', None)
+                    self.mqDevice = self.init.get('mqDevice', None)
+            
+            print self.svr
+            if not (self.svr):
+                
+                assert False, 'server not found' 
+
 
         def cleanUp(self):
             if (self.client):
