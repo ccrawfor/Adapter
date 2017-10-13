@@ -1,5 +1,6 @@
 
 import pymssql
+import adodbapi
 from adapterconfig import AdapterConfig
 import json
 import logging
@@ -88,7 +89,9 @@ class SoCEAdapter(AdapterConfig):
             tel.name = tag
             tel.value = value
             return str([json.dumps(tel.__dict__)]).replace("'","")
-        
+    
+    def __db_error(connection, cursor, errorclass, errorvalue):
+         logging.info("CE Connection Error (class): %s : (value): %s", errorclass, errorvalue) 
         
     def publishSB(self, msg):
         """ Publishes the readings to an mqtt broker:
@@ -105,19 +108,42 @@ class SoCEAdapter(AdapterConfig):
                 payload=msg, qos=0, retain=False)
 
     def getReadings(self):
-     
-        conn = pymssql.connect(server=self.svr, user=self.usr, password=self.pwd, database=self.db, port=self.prt, host=self.hst)
+
+        if self.type == 'sqlexpress':
+           conn = pymssql.connect(server=self.svr, user=self.usr, password=self.pwd, database=self.db, port=self.prt, host=self.hst)
+        elif self.type == 'compact':
+             conn_args = {'database': self.db}
+             conn_args['connection_string'] = """Provider=Microsoft.SQLSERVER.CE.OLEDB.4.0;Data Source=%(database)s;"""
+             conn = adodbapi.connect(conn_args)
+             conn.connector.CursorLocation = 2
+             conn.errorhandler = self.__db_error
+            
         ret = {}
+        
+        
         for key, value in self.sql.items():
-            cur = conn.cursor()
-            cur.execute(value)
-            for row in cur.fetchall():
-                ret[key] = row
-                   
+            if type(value) is dict:
+                for k, v in value.items():
+                    if not type(v) is list:
+                        cur = conn.cursor()
+                        cur.execute(v)
+                        for row in cur.fetchall():
+                            if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
+                                self.dumpRecords(row, v, value.get('position'), key)
+                            ret[key] = row[(value.get('position'))[0]]
+
+     
         conn.close
         if ret:
             return ret
 
         return None
 
-  
+    def dumpRecords(self, row, sql, pos, key):
+        values = []
+        for x in pos:
+            values.append(row[x])
+		
+        logging.debug(key + " : " + sql + " : " + str(values))
+        #logging.debug(sql)
+        #logging.debug(values)

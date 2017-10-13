@@ -75,24 +75,29 @@ class AdapterConfig(object):
             self.mqPort = self.mqServer.get('port')
             self.mqKeepAlive = self.mqServer.get('keepalive')
             #if using ifm smart observer
-            if 'ifm' in vendors and vendors['ifm']['smartobserver']:
-                if (name in vendors['ifm']['smartobserver']):
-                    self.init = vendors['ifm']['smartobserver']['sqlexpress']
-                    self.svr = self.init.get('server')
-                    self.usr = self.init.get('user')
-                    self.pwd = self.init.get('password')
-                    self.prt = self.init.get('port')
-                    self.hst = self.init.get('host')
-                    self.db = self.init.get('database')
-                    self.sql = self.init.get('sql')
-                    self.mqPword = self.init.get('mqPword', None)
-                    self.mqDevice = self.init.get('mqDevice', None)
+            if name == 'sqlexpress':
+                if 'ifm' in vendors and vendors['ifm']['smartobserver']:
+                    if (name in vendors['ifm']['smartobserver']):
+                        self.init = vendors['ifm']['smartobserver'][name]
+                        self.svr = self.init.get('server')
+                        self.usr = self.init.get('user')
+                        self.pwd = self.init.get('password')
+                        self.prt = self.init.get('port')
+                        self.hst = self.init.get('host')
+                        self.db = self.init.get('database')
+                        self.sql = self.init.get('sql')
+                        self.mqPword = self.init.get('mqPword', None)
+                        self.mqDevice = self.init.get('mqDevice', None)                  
+                        self.type = 'sqlexpress'
+            elif name == 'compact': #compact edition
+                self.init = vendors['ifm']['smartobserver']['compact']
+                self.db = self.init.get('database')
+                self.mqDevice = self.init.get('mqPord', None)
+                self.mqPword = self.init.get('mqDevice', None)
+                self.sql = self.init.get('sql')
+                self.type = 'compact'
             
-            print self.svr
-            if not (self.svr):
-                
-                assert False, 'server not found' 
-
+      
 
         def cleanUp(self):
             if (self.client):
