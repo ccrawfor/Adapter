@@ -17,6 +17,7 @@ class AdapterConfig(object):
             logging.getLogger().setLevel(logging.DEBUG)
             logging.getLogger("enip").setLevel(logging.WARNING)
             logging.getLogger("cpppo").setLevel(logging.WARNING)
+            logging.getLogger("pymodbus").setLevel(logging.WARNING)
             signal.signal(signal.SIGTERM, self.service_shutdown)
             signal.signal(signal.SIGINT, self.service_shutdown)
             rfh = RotatingFileHandler(settings['relayr']['logpath'] + name + '.log', mode='a', maxBytes=10485760, backupCount=5, encoding=None, delay=0)
@@ -58,22 +59,26 @@ class AdapterConfig(object):
                                 #add self assert to check for existence of both.
                                 if (self.mqPword is None) or (self.mqDevice is None):
                                     assert False, 'Device missing device and password'
-                else:
+                if not (self.init):
                     if ('modbus' in dev['plc']):
                         if (dev['plc']['modbus']):
                             if (name in dev['plc']['modbus']):
                                 self.init = dev['plc']['modbus'][name]
+                                self.mqPword = self.init.get('mqPword', None)
+                                self.mqDevice = self.init.get('mqDevice', None)
+                                self.host = self.init.get('host')
+                                self.port = self.init.get('port')
+                                self.register = self.init.get('register')
+                                self.length = self.init.get('length')
+                                self.unit = self.init.get('unit')
+                                self.tag = self.init.get('tag')
+                                self.topic = self.init.get('topic')
+                                self.init = 'modbus'
+
             #expand to include known sensors
             if not (self.init):
                 logging.debug('Device not found Checking Vendors')
-            if  settings['relayr']['mqtt_credentials']:
-                self.mqUser = settings['relayr']['mqtt_credentials']['user']         
-                self.mqPwd = settings['relayr']['mqtt_credentials']['password']
-            self.mqServer = settings['relayr']['mqtt_server']
-            #self.mqServer = settings['relayr']['mqtt_server']['server']
-            self.mqHost = self.mqServer.get('server')
-            self.mqPort = self.mqServer.get('port')
-            self.mqKeepAlive = self.mqServer.get('keepalive')
+            
             #if using ifm smart observer
             if name == 'sqlexpress':
                 if 'ifm' in vendors and vendors['ifm']['smartobserver']:
@@ -97,7 +102,14 @@ class AdapterConfig(object):
                 self.sql = self.init.get('sql')
                 self.type = 'compact'
             
-      
+            if  settings['relayr']['mqtt_credentials']:
+                self.mqUser = settings['relayr']['mqtt_credentials']['user']         
+                self.mqPwd = settings['relayr']['mqtt_credentials']['password']
+            self.mqServer = settings['relayr']['mqtt_server']
+            #self.mqServer = settings['relayr']['mqtt_server']['server']
+            self.mqHost = self.mqServer.get('server')
+            self.mqPort = self.mqServer.get('port')
+            self.mqKeepAlive = self.mqServer.get('keepalive')       
 
         def cleanUp(self):
             if (self.client):

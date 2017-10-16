@@ -2,10 +2,10 @@ import time
 import logging
 import sys
 from exception import ServiceExit
-from soceadapter import SoCEAdapter
+from soadapter import SoAdapter
 
 
-class bbuVibration(SoCEAdapter):
+class bbuVibration(SoAdapter):
 
     def __init__(self,name):
         super(bbuVibration, self).__init__(name)
@@ -17,7 +17,8 @@ class bbuVibration(SoCEAdapter):
                 if readings:
                     for key, value in readings.iteritems():
                         logging.debug("Key: %s & value: %s", key, value)
-                time.sleep(0.5)
+                        self.publishSB(self.telemetryCloud(key, value[0]),value[1])
+                time.sleep(1.0)
             except ServiceExit:
                 self.cleanUp()
                 break

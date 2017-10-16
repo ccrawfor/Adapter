@@ -196,6 +196,7 @@ class Adapter(AdapterConfig):
             """
           
             logging.debug(msg)
+         
             if not all(chr in msg for chr in 'state'):
                 self.client.publish(self.topic,
                     payload=msg, qos=0, retain=False)
