@@ -100,9 +100,11 @@ class SoAdapter(AdapterConfig):
 
         :param :msg: Formatted message appropriate for the subscriber
         """
-          
+        
+        tpc = "/devices/%s/measurements" % topic
+        logging.debug(tpc)
         if not all(chr in msg for chr in 'state'):
-            self.client.publish(topic,
+            self.client.publish(tpc,
                 payload=msg, qos=0, retain=False)
         else:             
             self.client.publish(self.alertTopic,
