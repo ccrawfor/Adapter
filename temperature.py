@@ -20,7 +20,7 @@ class bbuTemperature(ModBusAdapter):
                         logging.debug("Key: %s & value: %s", key, value)
                         temp = value / 10 
                         self.publishSB(self.telemetryCloud(key, temp))
-                time.sleep(1.0)
+                time.sleep(30.0)
             except ServiceExit:
                 self.cleanUp()
                 break

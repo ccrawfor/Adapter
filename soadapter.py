@@ -131,9 +131,13 @@ class SoAdapter(AdapterConfig):
                     if not type(v) is list:
                         cur = conn.cursor()
                         cur.execute(v)
+                        cnt = 0
                         for row in cur.fetchall():
                             if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
                                 self.dumpRecords(row, v, value.get('position'), key)
+                            cnt = cnt + 1
+                            if cnt > 5:
+                                break
                             ret[key] = [row[(value.get('position'))[0]],value.get('topic')[0]]
                         cur.close()
         

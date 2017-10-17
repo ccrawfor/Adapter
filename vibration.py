@@ -18,7 +18,7 @@ class bbuVibration(SoAdapter):
                     for key, value in readings.iteritems():
                         logging.debug("Key: %s & value: %s", key, value)
                         self.publishSB(self.telemetryCloud(key, value[0]),value[1])
-                time.sleep(1.0)
+                time.sleep(30.0)
             except ServiceExit:
                 self.cleanUp()
                 break
