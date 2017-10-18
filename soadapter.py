@@ -103,12 +103,14 @@ class SoAdapter(AdapterConfig):
         
         tpc = "/devices/%s/measurements" % topic
         logging.debug(tpc)
-        if not all(chr in msg for chr in 'state'):
-            self.client.publish(tpc,
-                payload=msg, qos=0, retain=False)
-        else:             
-            self.client.publish(self.alertTopic,
-                payload=msg, qos=0, retain=False)
+        logging.debug(msg)
+        #if not all(chr in msg for chr in 'state'):
+        self.client.publish(tpc,
+            payload=msg, qos=0, retain=False)
+        #else:
+        #    print msg
+        #    self.client.publish(self.alertTopic,
+        #        payload=msg, qos=0, retain=False)
 
     def getReadings(self):
 

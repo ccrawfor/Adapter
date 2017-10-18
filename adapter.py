@@ -197,10 +197,11 @@ class Adapter(AdapterConfig):
           
             logging.debug(msg)
          
-            if not all(chr in msg for chr in 'state'):
+            #if not all(chr in msg for chr in 'state'):
+            if not 'state' in msg:
                 self.client.publish(self.topic,
                     payload=msg, qos=0, retain=False)
-            else:             
+            else:
                 self.client.publish(self.alertTopic,
                    payload=msg, qos=0, retain=False)
 

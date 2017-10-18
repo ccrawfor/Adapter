@@ -57,8 +57,8 @@ class AdapterConfig(object):
                                 self.mqPword = self.init.get('mqPword', None)
                                 self.mqDevice = self.init.get('mqDevice', None)
                                 #add self assert to check for existence of both.
-                                if (self.mqPword is None) or (self.mqDevice is None):
-                                    assert False, 'Device missing device and password'
+                                #if (self.mqPword is None) or (self.mqDevice is None):
+                                #    assert False, 'Device missing device and password'
                 if not (self.init):
                     if ('modbus' in dev['plc']):
                         if (dev['plc']['modbus']):
