@@ -226,6 +226,14 @@ class Adapter(AdapterConfig):
                         for idx, val in enumerate(self.tags):
                             if isinstance(transactions[idx], list):
                                  ret[val]=transactions[idx][0]
+                                 if not transactions[idx] is list:
+                                        if len(transactions[idx]) == 1:
+                                            ret[val]=transactions[idx][0]
+                                        else:
+                                            v = ''.join(chr(i) for i in transactions[idx])
+                                            ret[val]=v
+
+                                 
                  if ret:
                     return ret       
 
