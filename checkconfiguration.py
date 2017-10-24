@@ -16,7 +16,11 @@ def checkConfiguration(name, tag):
             if (dev['plc']['enip']):
                 if (name in dev['plc']['enip']):
                         init = dev['plc']['enip'][name]
-                        print init.get(tag, "None")
+                        if (init.get(tag, "None") == "None"):
+                            i = init['tags'][tag]
+                            print i
+                        else:
+                            print init.get(tag, "None")
     if ('modbus' in dev['plc']):
                         if (dev['plc']['modbus']):
                             if (name in dev['plc']['modbus']):

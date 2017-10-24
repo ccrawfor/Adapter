@@ -101,7 +101,7 @@ class SoAdapter(AdapterConfig):
         :param :msg: Formatted message appropriate for the subscriber
         """
         
-        tpc = "/devices/%s/measurements" % topic
+        tpc = "devices/%s/measurements" % topic
         logging.debug(tpc)
         logging.debug(msg)
         #if not all(chr in msg for chr in 'state'):
@@ -116,6 +116,7 @@ class SoAdapter(AdapterConfig):
 
         if self.type == 'sqlexpress':
            conn = pymssql.connect(server=self.svr, user=self.usr, password=self.pwd, database=self.db, port=self.prt, host=self.hst)
+           logging.debug("Connection Open")
         elif self.type == 'compact':
              conn_args = {'database': self.db}
              conn_args['connection_string'] = """Provider=Microsoft.SQLSERVER.CE.OLEDB.4.0;Data Source=%(database)s;"""
